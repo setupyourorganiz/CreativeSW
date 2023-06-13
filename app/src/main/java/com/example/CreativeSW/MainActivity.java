@@ -14,6 +14,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
 import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.view.WindowManager;
@@ -75,7 +76,6 @@ public class MainActivity extends AppCompatActivity {
     ListView listView;
     TextView txtResult;
     WebView webView = null;
-    Button btn_send;
     Button btn_findRoute;
     Button btn_nowLocation;
     EditText edit_startLocation;
@@ -161,18 +161,11 @@ public class MainActivity extends AppCompatActivity {
         webView.loadUrl(serverUrl);
 
         webView.addJavascriptInterface(new MainActivity.Bridge(this), "Bridge");
-        btn_send = findViewById(R.id.send_location);
         btn_findRoute = findViewById(R.id.find_route);   // 길찾기 버튼
         btn_nowLocation = findViewById(R.id.now_location);   //  현위치 버튼
         edit_startLocation = findViewById(R.id.start_location);
         edit_endLocation = findViewById(R.id.end_location);
 
-        btn_send.setOnClickListener((new View.OnClickListener(){
-            public void onClick(View v){
-                long time = System.currentTimeMillis();
-                webView.loadUrl("javascript:AndroidToSend(" + txtResult + ")");
-            }
-        }));
         btn_findRoute.setOnClickListener((v -> btnClicked_findRoute(v)));
         btn_nowLocation.setOnClickListener((v->btnClicked_nowLocation(v)));
 
@@ -480,6 +473,12 @@ public class MainActivity extends AppCompatActivity {
 //        return device.createRfcommSocketToServiceRecord(BT_MODULE_UUID);
 //    }
 
+    void init_edit_endpoint(){
+        Editable start = edit_startLocation.getEditableText();
+        Editable end = edit_endLocation.getEditableText();
+        start.clear();
+        end.clear();
+    }
     void btnClicked_findRoute(View v){
         String start[] = edit_startLocation.getText().toString().split(",");
         String end[] = edit_endLocation.getText().toString().split(",");
@@ -487,6 +486,7 @@ public class MainActivity extends AppCompatActivity {
         String y1 = start[1];
         String x2 = end[0];
         String y2 = end[1];
+        init_edit_endpoint();
         webView.loadUrl("javascript:toWeb_navigate(" + x1 + "," + y1 + "," + x2 + "," + y2 + ")");
     }
     void btnClicked_nowLocation(View v){
@@ -498,7 +498,9 @@ public class MainActivity extends AppCompatActivity {
                     REQUEST_LOCATION_PERMISSION);
         } else {
             getLocation();
-            webView.loadUrl("javascript:toWeb_currXy(x, y)");
+            String x = "127.0128954";
+            String y = "37.5596518";
+            webView.loadUrl("javascript:toWeb_currXy(" + x + "," + y + ")");
         }
     }
 
@@ -585,9 +587,13 @@ public class MainActivity extends AppCompatActivity {
             String xy = x + "," + y;
             Log.d("inapp", edit_startLocation.getText().toString());
             if(edit_startLocation.getText().toString().equals("")){
-                edit_startLocation.setText(xy);
+                Editable editable = edit_startLocation.getEditableText();
+                editable.clear();
+                editable.append(xy);
             }else{
-                edit_endLocation.setText(xy);
+                Editable editable = edit_endLocation.getEditableText();
+                editable.clear();
+                editable.append(xy);
             }
         }
     }
