@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:orientation="vertical"
+    tools:context=".WebViewActivity">
+
+    <LinearLayout
+        android:id="@+id/biggest_linear"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:id="@+id/upper_rel_layout"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:orientation="horizontal"
+            android:layout_alignParentTop="true">
+
+            <RelativeLayout
+                android:id="@+id/input_box"
+                android:layout_width="200dp"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:id="@+id/first_inputbox"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_weight="1"
+                    android:layout_alignParentTop="true"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:layout_marginLeft="10dp"
+                        android:gravity="center_vertical"
+                        android:text="이름 : "
+                        android:textSize="17sp"></TextView>
+
+                    <EditText
+                        android:id="@+id/name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:ems="10"
+                        android:gravity="center"
+                        android:hint="이름"
+                        android:textSize="20sp">
+
+                    </EditText>
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/second_inputbox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_below="@id/first_inputbox"
+                    android:layout_weight="1">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="50dp"
+                        android:layout_gravity="center"
+                        android:gravity="center_vertical"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginLeft="10dp"
+                        android:text="위도 : "
+                        android:textSize="17sp"></TextView>
+
+                    <EditText
+                        android:id="@+id/lat"
+                        android:layout_width="wrap_content"
+                        android:layout_height="50dp"
+                        android:layout_gravity="center"
+                        android:ems="10"
+                        android:gravity="center"
+                        android:hint="위도"
+                        android:textSize="20sp">
+
+                    </EditText>
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/second_inputbox"
+                    android:layout_centerHorizontal="true"
+                    android:layout_weight="1">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:gravity="center_vertical"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginLeft="10dp"
+                        android:text="경도 : "
+                        android:textSize="17sp"></TextView>
+
+                    <EditText
+                        android:id="@+id/lng"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:ems="10"
+                        android:gravity="center"
+                        android:hint="경도"
+                        android:textSize="20sp">
+
+                    </EditText>
+
+                </RelativeLayout>
+
+            </RelativeLayout>
+
+            <Button
+                android:id="@+id/regist"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="3dp"
+                android:text="등록\n하기"
+                android:textSize="20sp">
+
+            </Button>
+
+            <Button
+                android:id="@+id/call_in"
+                android:text="불러\n오기"
+                android:textSize="20sp"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_marginRight="105dp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_gravity="center">
+
+            </Button>
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_below="@id/upper_rel_layout"
+            android:layout_width="match_parent"
+            android:layout_height="49dp"
+            android:orientation="horizontal">
+
+            <Spinner
+                android:id="@+id/whole_arduino"
+                android:layout_marginLeft="40dp"
+                android:layout_width="150dp"
+                android:layout_height="match_parent"
+                android:gravity="center">
+
+            </Spinner>
+            <Spinner
+                android:id="@+id/in_route_arduino"
+                android:layout_marginRight="40dp"
+                android:layout_alignParentRight="true"
+                android:layout_width="150dp"
+                android:layout_height="match_parent"
+                android:gravity="center">
+
+            </Spinner>
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <WebView
+        android:id="@+id/webview"
+        android:layout_width="360dp"
+        android:layout_height="400dp"
+        android:layout_below="@id/biggest_linear"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@id/down_layout"/>
+
+    <LinearLayout
+        android:id="@+id/down_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_weight="7"
+        android:layout_alignParentBottom="true"
+        app:layout_constraintTop_toBottomOf="@id/webview" >
+
+        <Button
+            android:id="@+id/next_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="left"
+            android:text="사용자"
+            android:layout_weight="1"/>
+
+        <Button
+            android:id="@+id/next_l"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="right"
+            android:text="관리자"
+            android:layout_weight="1"/>
+
+    </LinearLayout>
+
+</RelativeLayout>
