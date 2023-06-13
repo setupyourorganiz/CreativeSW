@@ -85,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_LOCATION_PERMISSION = 1;
     private final Handler handler = new Handler();
     private int order = 0;
+    final String serverUrl = "http://3.35.191.211:8080";
 
     private static String TARGET_DEVICE_NAME = "";
     private BluetoothConnector bluetoothConnector;
@@ -95,13 +96,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        bluetoothConnector = new BluetoothConnector(this, TARGET_DEVICE_NAME);
-        bluetoothConnector.startBluetoothConnection(this);
-
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(BluetoothConnector.ACTION_CONNECTION_SUCCESS);
-        filter.addAction(BluetoothConnector.ACTION_CONNECTION_SUCCESS);
-        registerReceiver(connectionReceiver, filter);
 
         Button imageButton = findViewById(R.id.next_intent);
         imageButton.setOnClickListener(new View.OnClickListener() {
@@ -164,17 +158,14 @@ public class MainActivity extends AppCompatActivity {
         // javascript의 window.open 허용
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
 
-        webView.loadUrl("http://3.35.191.211:8080");
+        webView.loadUrl(serverUrl);
 
-        webView.addJavascriptInterface(new Bridge(this), "Bridge");
+        webView.addJavascriptInterface(new MainActivity.Bridge(this), "Bridge");
         btn_send = findViewById(R.id.send_location);
         btn_findRoute = findViewById(R.id.find_route);   // 길찾기 버튼
         btn_nowLocation = findViewById(R.id.now_location);   //  현위치 버튼
         edit_startLocation = findViewById(R.id.start_location);
         edit_endLocation = findViewById(R.id.end_location);
-
-        String StartLocation = edit_startLocation.getText().toString();  // 출발 좌표를 StartLocaiton에 저장
-        String EndLocation = edit_endLocation.getText().toString();      // 도착 좌표를 EndLocation에 저장
 
         btn_send.setOnClickListener((new View.OnClickListener(){
             public void onClick(View v){
@@ -194,21 +185,21 @@ public class MainActivity extends AppCompatActivity {
         ActivityCompat.requestPermissions(MainActivity.this, permission_list, 1);
 
         // Enable bluetooth
-        btAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (!btAdapter.isEnabled()) {
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return;
-            }
-            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-        }
+//        bluetoothbtAdapter = BluetoothAdapter.getDefaultAdapter();
+//        if (!btAdapter.isEnabled()) {
+//            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+//            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+//                // TODO: Consider calling
+//                //    ActivityCompat#requestPermissions
+//                // here to request the missing permissions, and then overriding
+//                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+//                //                                          int[] grantResults)
+//                // to handle the case where the user grants the permission. See the documentation
+//                // for ActivityCompat#requestPermissions for more details.
+//                return;
+//            }
+//            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+//        }
 
         ActivityCompat.requestPermissions(MainActivity.this,
                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
@@ -216,18 +207,27 @@ public class MainActivity extends AppCompatActivity {
         getLocation();
 
         // variables
-        textStatus = (TextView) findViewById(R.id.text_status);
-        btnPaired = (Button) findViewById(R.id.btn_paired);
-        btnSearch = (Button) findViewById(R.id.btn_search);
-        btnSend1 = (Button) findViewById(R.id.btn_send1);
-        listView = (ListView) findViewById(R.id.listview);
+//        textStatus = (TextView) findViewById(R.id.text_status);
+//        btnPaired = (Button) findViewById(R.id.btn_paired);
+//        btnSearch = (Button) findViewById(R.id.btn_search);
+//        btnSend1 = (Button) findViewById(R.id.btn_send1);
+//        listView = (ListView) findViewById(R.id.listview);
 
         // Show paired devices
-        btArrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
-        deviceAddressArray = new ArrayList<>();
-        listView.setAdapter(btArrayAdapter);
+        //btArrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
+        //deviceAddressArray = new ArrayList<>();
+        //listView.setAdapter(btArrayAdapter);
 
-        listView.setOnItemClickListener(new myOnItemClickListener());
+        //listView.setOnItemClickListener(new myOnItemClickListener());
+
+
+        //bluetoothConnector = new BluetoothConnector(this, TARGET_DEVICE_NAME);
+        //bluetoothConnector.startBluetoothConnection(this);
+
+        //IntentFilter filter = new IntentFilter();
+        //filter.addAction(BluetoothConnector.ACTION_CONNECTION_SUCCESS);
+        //filter.addAction(BluetoothConnector.ACTION_CONNECTION_SUCCESS);
+        //registerReceiver(connectionReceiver, filter);
     }
     // BluetoothConnector의 블루투스 연결을 시작하는 메소드 호출
     @Override
@@ -235,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
 
         // 블루투스 연결 시작
-        bluetoothConnector.startBluetoothConnection(getApplicationContext());
+        //bluetoothConnector.startBluetoothConnection(getApplicationContext());
     }
 
     // GPS에 대한 함수들
@@ -289,196 +289,196 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // 블루투스 관련 함수들
-    public void onClickButtonPaired(View view) {
-        btArrayAdapter.clear();
-        if (deviceAddressArray != null && !deviceAddressArray.isEmpty()) {
-            deviceAddressArray.clear();
-        }
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        pairedDevices = btAdapter.getBondedDevices();
-        if (pairedDevices.size() > 0) {
-            // There are paired devices. Get the name and address of each paired device.
-            for (BluetoothDevice device : pairedDevices) {
-                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for ActivityCompat#requestPermissions for more details.
-                    return;
-                }
-                String deviceName = device.getName();
-                String deviceHardwareAddress = device.getAddress(); // MAC address
-                btArrayAdapter.add(deviceName);
-                deviceAddressArray.add(deviceHardwareAddress);
-            }
-        }
-    }
+//    public void onClickButtonPaired(View view) {
+//        btArrayAdapter.clear();
+//        if (deviceAddressArray != null && !deviceAddressArray.isEmpty()) {
+//            deviceAddressArray.clear();
+//        }
+//        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+//            // TODO: Consider calling
+//            //    ActivityCompat#requestPermissions
+//            // here to request the missing permissions, and then overriding
+//            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+//            //                                          int[] grantResults)
+//            // to handle the case where the user grants the permission. See the documentation
+//            // for ActivityCompat#requestPermissions for more details.
+//            return;
+//        }
+//        pairedDevices = btAdapter.getBondedDevices();
+//        if (pairedDevices.size() > 0) {
+//            // There are paired devices. Get the name and address of each paired device.
+//            for (BluetoothDevice device : pairedDevices) {
+//                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+//                    // TODO: Consider calling
+//                    //    ActivityCompat#requestPermissions
+//                    // here to request the missing permissions, and then overriding
+//                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+//                    //                                          int[] grantResults)
+//                    // to handle the case where the user grants the permission. See the documentation
+//                    // for ActivityCompat#requestPermissions for more details.
+//                    return;
+//                }
+//                String deviceName = device.getName();
+//                String deviceHardwareAddress = device.getAddress(); // MAC address
+//                btArrayAdapter.add(deviceName);
+//                deviceAddressArray.add(deviceHardwareAddress);
+//            }
+//        }
+//    }
 
-    public void onClickButtonSearch(View view) {
-        // Check if the device is already discovering
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        if (btAdapter.isDiscovering()) {
-            btAdapter.cancelDiscovery();
-        } else {
-            if (btAdapter.isEnabled()) {
-                btAdapter.startDiscovery();
-                btArrayAdapter.clear();
-                if (deviceAddressArray != null && !deviceAddressArray.isEmpty()) {
-                    deviceAddressArray.clear();
-                }
-                IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-                registerReceiver(receiver, filter);
-            } else {
-                Toast.makeText(getApplicationContext(), "bluetooth not on", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
+//    public void onClickButtonSearch(View view) {
+//        // Check if the device is already discovering
+//        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+//            // TODO: Consider calling
+//            //    ActivityCompat#requestPermissions
+//            // here to request the missing permissions, and then overriding
+//            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+//            //                                          int[] grantResults)
+//            // to handle the case where the user grants the permission. See the documentation
+//            // for ActivityCompat#requestPermissions for more details.
+//            return;
+//        }
+//        if (btAdapter.isDiscovering()) {
+//            btAdapter.cancelDiscovery();
+//        } else {
+//            if (btAdapter.isEnabled()) {
+//                btAdapter.startDiscovery();
+//                btArrayAdapter.clear();
+//                if (deviceAddressArray != null && !deviceAddressArray.isEmpty()) {
+//                    deviceAddressArray.clear();
+//                }
+//                IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+//                registerReceiver(receiver, filter);
+//            } else {
+//                Toast.makeText(getApplicationContext(), "bluetooth not on", Toast.LENGTH_SHORT).show();
+//            }
+//        }
+//    }
 
     // Send string "a"
-    public void onClickButtonSend1(View view) {
-        if (connectedThread != null) {
-            connectedThread.write("a");
-        }
-    }
+//    public void onClickButtonSend1(View view) {
+//        if (connectedThread != null) {
+//            connectedThread.write("a");
+//        }
+//    }
 
     // Create a BroadcastReceiver for ACTION_FOUND.
-    private final BroadcastReceiver receiver = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                // Discovery has found a device. Get the BluetoothDevice
-                // object and its info from the Intent.
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for ActivityCompat#requestPermissions for more details.
-                    return;
-                }
-                String deviceName = device.getName();
-                String deviceHardwareAddress = device.getAddress(); // MAC address
-                btArrayAdapter.add(deviceName);
-                deviceAddressArray.add(deviceHardwareAddress);
-                btArrayAdapter.notifyDataSetChanged();
-            }
-        }
-    };
+//    private final BroadcastReceiver receiver = new BroadcastReceiver() {
+//        public void onReceive(Context context, Intent intent) {
+//            String action = intent.getAction();
+//            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+//                // Discovery has found a device. Get the BluetoothDevice
+//                // object and its info from the Intent.
+//                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+//                if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+//                    // TODO: Consider calling
+//                    //    ActivityCompat#requestPermissions
+//                    // here to request the missing permissions, and then overriding
+//                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+//                    //                                          int[] grantResults)
+//                    // to handle the case where the user grants the permission. See the documentation
+//                    // for ActivityCompat#requestPermissions for more details.
+//                    return;
+//                }
+//                String deviceName = device.getName();
+//                String deviceHardwareAddress = device.getAddress(); // MAC address
+//                btArrayAdapter.add(deviceName);
+//                deviceAddressArray.add(deviceHardwareAddress);
+//                btArrayAdapter.notifyDataSetChanged();
+//            }
+//        }
+//    };
+//
+//    private BroadcastReceiver connectionReceiver = new BroadcastReceiver() {
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            String action = intent.getAction();
+//            if (BluetoothConnector.ACTION_CONNECTION_SUCCESS.equals(action)) {
+//                String deviceName = intent.getStringExtra(BluetoothConnector.EXTRA_DEVICE_NAME);
+//                // 블루투스 연결 성공 처리
+//                Log.d("MainActivity", "Bluetooth connection success: " + deviceName);
+//            } else if (BluetoothConnector.ACTION_CONNECTION_FAILURE.equals(action)) {
+//                String deviceName = intent.getStringExtra(BluetoothConnector.EXTRA_DEVICE_NAME);
+//                // 블루투스 연결 실패 처리
+//                Log.e("MainActivity", "Bluetooth connection failure: " + deviceName);
+//            }
+//        }
+//    };
 
-    private BroadcastReceiver connectionReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (BluetoothConnector.ACTION_CONNECTION_SUCCESS.equals(action)) {
-                String deviceName = intent.getStringExtra(BluetoothConnector.EXTRA_DEVICE_NAME);
-                // 블루투스 연결 성공 처리
-                Log.d("MainActivity", "Bluetooth connection success: " + deviceName);
-            } else if (BluetoothConnector.ACTION_CONNECTION_FAILURE.equals(action)) {
-                String deviceName = intent.getStringExtra(BluetoothConnector.EXTRA_DEVICE_NAME);
-                // 블루투스 연결 실패 처리
-                Log.e("MainActivity", "Bluetooth connection failure: " + deviceName);
-            }
-        }
-    };
+//    @Override
+//    protected void onDestroy() {
+//        super.onDestroy();
+//
+//        // Don't forget to unregister the ACTION_FOUND receiver.
+//        unregisterReceiver(receiver);
+//
+//        // 두번째 블루투스 연결 종료
+//        bluetoothConnector.stopBluetoothConnection(this);
+//    }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
+//    public class myOnItemClickListener implements AdapterView.OnItemClickListener {
 
-        // Don't forget to unregister the ACTION_FOUND receiver.
-        unregisterReceiver(receiver);
+//        @Override
+//        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//            Toast.makeText(getApplicationContext(), btArrayAdapter.getItem(position), Toast.LENGTH_SHORT).show();
+//
+//            textStatus.setText("try...");
+//
+//            final String name = btArrayAdapter.getItem(position); // get name
+//            final String address = deviceAddressArray.get(position); // get address
+//            boolean flag = true;
+//
+//            BluetoothDevice device = btAdapter.getRemoteDevice(address);
+//
+//            // create & connect socket
+//            try {
+//                btSocket = createBluetoothSocket(device);
+//                if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+//                    // TODO: Consider calling
+//                    //    ActivityCompat#requestPermissions
+//                    // here to request the missing permissions, and then overriding
+//                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+//                    //                                          int[] grantResults)
+//                    // to handle the case where the user grants the permission. See the documentation
+//                    // for ActivityCompat#requestPermissions for more details.
+//                    return;
+//                }
+//                btSocket.connect();
+//            } catch (IOException e) {
+//                flag = false;
+//                textStatus.setText("connection failed!");
+//                e.printStackTrace();
+//            }
+//
+//            // start bluetooth communication
+//            if (flag) {
+//                textStatus.setText("connected to " + name);
+//                connectedThread = new com.example.CreativeSW.ConnectedThread(btSocket);
+//                connectedThread.start();
+//            }
+//
+//        }
+//    }
 
-        // 두번째 블루투스 연결 종료
-        bluetoothConnector.stopBluetoothConnection(this);
-    }
-
-    public class myOnItemClickListener implements AdapterView.OnItemClickListener {
-
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Toast.makeText(getApplicationContext(), btArrayAdapter.getItem(position), Toast.LENGTH_SHORT).show();
-
-            textStatus.setText("try...");
-
-            final String name = btArrayAdapter.getItem(position); // get name
-            final String address = deviceAddressArray.get(position); // get address
-            boolean flag = true;
-
-            BluetoothDevice device = btAdapter.getRemoteDevice(address);
-
-            // create & connect socket
-            try {
-                btSocket = createBluetoothSocket(device);
-                if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for ActivityCompat#requestPermissions for more details.
-                    return;
-                }
-                btSocket.connect();
-            } catch (IOException e) {
-                flag = false;
-                textStatus.setText("connection failed!");
-                e.printStackTrace();
-            }
-
-            // start bluetooth communication
-            if (flag) {
-                textStatus.setText("connected to " + name);
-                connectedThread = new com.example.CreativeSW.ConnectedThread(btSocket);
-                connectedThread.start();
-            }
-
-        }
-    }
-
-    private BluetoothSocket createBluetoothSocket(BluetoothDevice device) throws IOException {
-        try {
-            final Method m = device.getClass().getMethod("createInsecureRfcommSocketToServiceRecord", UUID.class);
-            return (BluetoothSocket) m.invoke(device, BT_MODULE_UUID);
-        } catch (Exception e) {
-            Log.e(TAG, "Could not create Insecure RFComm Connection", e);
-        }
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return TODO;
-        }
-        return device.createRfcommSocketToServiceRecord(BT_MODULE_UUID);
-    }
+//    private BluetoothSocket createBluetoothSocket(BluetoothDevice device) throws IOException {
+//        try {
+//            final Method m = device.getClass().getMethod("createInsecureRfcommSocketToServiceRecord", UUID.class);
+//            return (BluetoothSocket) m.invoke(device, BT_MODULE_UUID);
+//        } catch (Exception e) {
+//            Log.e(TAG, "Could not create Insecure RFComm Connection", e);
+//        }
+//        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+//            // TODO: Consider calling
+//            //    ActivityCompat#requestPermissions
+//            // here to request the missing permissions, and then overriding
+//            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+//            //                                          int[] grantResults)
+//            // to handle the case where the user grants the permission. See the documentation
+//            // for ActivityCompat#requestPermissions for more details.
+//            return TODO;
+//        }
+//        return device.createRfcommSocketToServiceRecord(BT_MODULE_UUID);
+//    }
 
     void btnClicked_findRoute(View v){
         String start[] = edit_startLocation.getText().toString().split(",");
@@ -499,6 +499,96 @@ public class MainActivity extends AppCompatActivity {
         } else {
             getLocation();
             webView.loadUrl("javascript:toWeb_currXy(x, y)");
+        }
+    }
+
+
+    public class Bridge{
+        Context mContext;
+        public Bridge(Context context){
+            mContext = context;
+        }
+
+        // 현재 등록된 모든 아두이노 정보를 가져옴
+        @JavascriptInterface
+        public void fromWeb_allArduino(final String arduinoList){
+            if(arduinoList == null){
+                Log.e("Javascript", "fromWeb_allArduino: Argument is null");
+                return;
+            }
+            Log.d("Javascript", "fromWeb_allArduino:\n" + arduinoList);
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                ArduinoDto[] arduinoDtoList = objectMapper.readValue(arduinoList, ArduinoDto[].class);
+
+                // TARGET_DEVICE_NAME에 들어있는 이름과 같은 기기를 발견하면 해당 기기와 연결
+
+
+            } catch (Exception e) {
+                Log.e("Javascript", e.getMessage());
+                e.printStackTrace();
+            }
+        }
+
+        // 길찾기에서 경로 상에 있는 사거리 아두이노 리스트를 가져옴.
+        @JavascriptInterface
+        public void fromWeb_pathArduino(final String pathArduinoList){
+            if(pathArduinoList == null){
+                Log.e("Javascript", "fromWeb_pathArduino: Argument is null");
+                return;
+            }
+            Log.d("Javascript", "fromWeb_pathArduino:\n" + pathArduinoList);
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                PathArduinoDto[] pathArduinoDtoList = objectMapper.readValue(pathArduinoList, PathArduinoDto[].class);
+
+                // <실행할 함수 추가>
+                for(PathArduinoDto e : pathArduinoDtoList){
+                    String msg = e.arduino.name + ": " + e.direction;
+                    Log.d("Javascript", msg);
+                }
+
+            } catch (Exception e) {
+                Log.e("Javascript", e.getMessage());
+                e.printStackTrace();
+            }
+        }
+
+        // 마커 클릭 시 마커의 좌표를 가져옴
+        @JavascriptInterface
+        public void fromWeb_xy(double x, double y){
+            String logMsg = "fromWeb_xy: " + x + ", " + y;
+            Log.d("Javascript", logMsg);
+
+            // <실행할 함수 추가>
+        }
+
+        // 자바스크립트 디버그를 안드로이드에 표시
+        @JavascriptInterface
+        public void fromWeb_debug(final String message){ // 블루투스 이름과 방향을 전달받는다
+            Log.d("Javascript", message);
+
+        }
+
+        // 자바스크립트 에러를 안드로이드에 표시
+        @JavascriptInterface
+        public void fromWeb_err(final String message){ // 블루투스 이름과 방향을 전달받는다
+            Log.e("Javascript", message);
+
+        }
+
+        @JavascriptInterface
+        public void fromWeb_markerClick(double x, double y){
+            String logMsg = "fromWeb_markerClick: " + x + ", " + y;
+            Log.d("Javascript", logMsg);
+
+            String xy = x + "," + y;
+            Log.d("inapp", edit_startLocation.getText().toString());
+            if(edit_startLocation.getText().toString().equals("")){
+                edit_startLocation.setText(xy);
+            }else{
+                edit_endLocation.setText(xy);
+            }
         }
     }
 }

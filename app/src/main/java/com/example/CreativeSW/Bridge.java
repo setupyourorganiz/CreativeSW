@@ -7,7 +7,6 @@ import android.webkit.JavascriptInterface;
 import com.example.CreativeSW.dto.ArduinoDto;
 import com.example.CreativeSW.dto.PathArduinoDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 public class Bridge{
     Context mContext;
     public Bridge(Context context){
@@ -88,5 +87,6 @@ public class Bridge{
         Log.d("Javascript", logMsg);
 
         // <실행할 함수 추가>
+
     }
 }
