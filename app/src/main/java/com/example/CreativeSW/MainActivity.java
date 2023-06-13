@@ -73,9 +73,14 @@ public class MainActivity extends AppCompatActivity {
     TextView textStatus;
     Button btnPaired, btnSearch, btnSend1;
     ListView listView;
-    private Button btn_location;
-    private TextView txtResult;
-    private WebView webView = null;
+    Button btn_location;
+    TextView txtResult;
+    WebView webView = null;
+    Button btn_send;
+    Button btn_findRoute;
+    Button btn_nowLocation;
+    EditText edit_startLocation;
+    EditText edit_endLocation;
     private LocationManager locationManager;
     private LocationListener locationListener;
     private static final int REQUEST_LOCATION_PERMISSION = 1;
@@ -179,16 +184,16 @@ public class MainActivity extends AppCompatActivity {
         webView.loadUrl("http://3.35.191.211:8080");
 
         webView.addJavascriptInterface(new Bridge(this), "Bridge");
-        Button sendbutton = findViewById(R.id.send_location);
-        Button route = findViewById(R.id.find_route);   // 길찾기 버튼
-        Button nowlocation = findViewById(R.id.now_location);   //  현위치 버튼
-        EditText startlocation = findViewById(R.id.start_location);
-        EditText endlocation = findViewById(R.id.end_location);
+        btn_send = findViewById(R.id.send_location);
+        btn_findRoute = findViewById(R.id.find_route);   // 길찾기 버튼
+        btn_nowLocation = findViewById(R.id.now_location);   //  현위치 버튼
+        edit_startLocation = findViewById(R.id.start_location);
+        edit_endLocation = findViewById(R.id.end_location);
 
-        String StartLocation = startlocation.getText().toString();  // 출발 좌표를 StartLocaiton에 저장
-        String EndLocation = endlocation.getText().toString();      // 도착 좌표를 EndLocation에 저장
+        String StartLocation = edit_startLocation.getText().toString();  // 출발 좌표를 StartLocaiton에 저장
+        String EndLocation = edit_endLocation.getText().toString();      // 도착 좌표를 EndLocation에 저장
 
-        sendbutton.setOnClickListener((new View.OnClickListener(){
+        btn_send.setOnClickListener((new View.OnClickListener(){
             public void onClick(View v){
                 long time = System.currentTimeMillis();
                 webView.loadUrl("javascript:AndroidToSend(" + txtResult + ")");
@@ -196,14 +201,10 @@ public class MainActivity extends AppCompatActivity {
         }));
 
         // 길찾기 버튼 이벤트
-        route.setOnClickListener((new View.OnClickListener(){
-            public void onClick(View v){
-                webView.loadUrl("javascript:toWeb_navigate(x1, y1, x2, y2)");
-            }
-        }));
+        btn_findRoute.setOnClickListener((v -> btnClicked_findRoute(v)));
 
         // 현위치 버튼 이벤트
-        nowlocation.setOnClickListener((new View.OnClickListener(){
+        btn_nowLocation.setOnClickListener((new View.OnClickListener(){
             public void onClick(View v){
                 webView.loadUrl("javascript:toWeb_currXy(x, y)");
             }
@@ -581,5 +582,15 @@ public class MainActivity extends AppCompatActivity {
             return TODO;
         }
         return device.createRfcommSocketToServiceRecord(BT_MODULE_UUID);
+    }
+
+    void btnClicked_findRoute(View v){
+        String start[] = edit_startLocation.getText().toString().split(",");
+        String end[] = edit_endLocation.getText().toString().split(",");
+        String x1 = start[0];
+        String y1 = start[1];
+        String x2 = end[0];
+        String y2 = end[1];
+        webView.loadUrl("javascript:toWeb_navigate(" + x1 + "," + y1 + "," + x2 + "," + y2 + ")");
     }
 }
