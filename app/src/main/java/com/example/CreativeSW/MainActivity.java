@@ -73,7 +73,6 @@ public class MainActivity extends AppCompatActivity {
     TextView textStatus;
     Button btnPaired, btnSearch, btnSend1;
     ListView listView;
-    Button btn_location;
     TextView txtResult;
     WebView webView = null;
     Button btn_send;
@@ -114,26 +113,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // GPS관련 내용들
-        btn_location = findViewById(R.id.btn_location);
         txtResult = findViewById(R.id.textView2);   // txtResult에 현재위치정보 저장됨
         txtResult.setMovementMethod(new ScrollingMovementMethod());
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
-        btn_location.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(MainActivity.this,
-                            new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                            REQUEST_LOCATION_PERMISSION);
-                } else {
-                    getLocation();
-                }
-            }
-        });
 
         locationListener = new LocationListener() {
             @Override
@@ -199,16 +182,8 @@ public class MainActivity extends AppCompatActivity {
                 webView.loadUrl("javascript:AndroidToSend(" + txtResult + ")");
             }
         }));
-
-        // 길찾기 버튼 이벤트
         btn_findRoute.setOnClickListener((v -> btnClicked_findRoute(v)));
-
-        // 현위치 버튼 이벤트
-        btn_nowLocation.setOnClickListener((new View.OnClickListener(){
-            public void onClick(View v){
-                webView.loadUrl("javascript:toWeb_currXy(x, y)");
-            }
-        }));
+        btn_nowLocation.setOnClickListener((v->btnClicked_nowLocation(v)));
 
         // 블루투스 관련 내용들
         // Get permission
@@ -235,6 +210,11 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
 
+        ActivityCompat.requestPermissions(MainActivity.this,
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                REQUEST_LOCATION_PERMISSION);
+        getLocation();
+
         // variables
         textStatus = (TextView) findViewById(R.id.text_status);
         btnPaired = (Button) findViewById(R.id.btn_paired);
@@ -256,90 +236,6 @@ public class MainActivity extends AppCompatActivity {
 
         // 블루투스 연결 시작
         bluetoothConnector.startBluetoothConnection(getApplicationContext());
-    }
-
-    // 웹과 주고받는 함수들
-    public class Bridge{
-        Context mContext;
-        public Bridge(Context context){
-            mContext = context;
-        }
-
-        // 현재 등록된 모든 아두이노 정보를 가져옴
-        @JavascriptInterface
-        public void fromWeb_allArduino(final String arduinoList){
-            if(arduinoList == null){
-                Log.e("Javascript", "fromWeb_allArduino: Argument is null");
-                return;
-            }
-            Log.d("Javascript", "fromWeb_allArduino:\n" + arduinoList);
-            try {
-                ObjectMapper objectMapper = new ObjectMapper();
-                ArduinoDto[] arduinoDtoList = objectMapper.readValue(arduinoList, ArduinoDto[].class);
-
-                // TARGET_DEVICE_NAME에 들어있는 이름과 같은 기기를 발견하면 해당 기기와 연결
-
-
-            } catch (Exception e) {
-                Log.e("Javascript", e.getMessage());
-                e.printStackTrace();
-            }
-        }
-
-        // 길찾기에서 경로 상에 있는 사거리 아두이노 리스트를 가져옴.
-        @JavascriptInterface
-        public void fromWeb_pathArduino(final String pathArduinoList){
-            if(pathArduinoList == null){
-                Log.e("Javascript", "fromWeb_pathArduino: Argument is null");
-                return;
-            }
-            Log.d("Javascript", "fromWeb_pathArduino:\n" + pathArduinoList);
-            try {
-                ObjectMapper objectMapper = new ObjectMapper();
-                PathArduinoDto[] pathArduinoDtoList = objectMapper.readValue(pathArduinoList, PathArduinoDto[].class);
-
-                // <실행할 함수 추가>
-                for(PathArduinoDto e : pathArduinoDtoList){
-                    String msg = e.arduino.name + ": " + e.direction;
-                    Log.d("Javascript", msg);
-                }
-
-            } catch (Exception e) {
-                Log.e("Javascript", e.getMessage());
-                e.printStackTrace();
-            }
-        }
-
-        // 마커 클릭 시 마커의 좌표를 가져옴
-        @JavascriptInterface
-        public void fromWeb_xy(double x, double y){
-            String logMsg = "fromWeb_xy: " + x + ", " + y;
-            Log.d("Javascript", logMsg);
-
-            // <실행할 함수 추가>
-        }
-
-        // 자바스크립트 디버그를 안드로이드에 표시
-        @JavascriptInterface
-        public void fromWeb_debug(final String message){ // 블루투스 이름과 방향을 전달받는다
-            Log.d("Javascript", message);
-
-        }
-
-        // 자바스크립트 에러를 안드로이드에 표시
-        @JavascriptInterface
-        public void fromWeb_err(final String message){ // 블루투스 이름과 방향을 전달받는다
-            Log.e("Javascript", message);
-
-        }
-
-        @JavascriptInterface
-        public void fromWeb_markerClick(double x, double y){
-            String logMsg = "fromWeb_markerClick: " + x + ", " + y;
-            Log.d("Javascript", logMsg);
-
-            // <실행할 함수 추가>
-        }
     }
 
     // GPS에 대한 함수들
@@ -592,5 +488,17 @@ public class MainActivity extends AppCompatActivity {
         String x2 = end[0];
         String y2 = end[1];
         webView.loadUrl("javascript:toWeb_navigate(" + x1 + "," + y1 + "," + x2 + "," + y2 + ")");
+    }
+    void btnClicked_nowLocation(View v){
+
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_LOCATION_PERMISSION);
+        } else {
+            getLocation();
+            webView.loadUrl("javascript:toWeb_currXy(x, y)");
+        }
     }
 }
