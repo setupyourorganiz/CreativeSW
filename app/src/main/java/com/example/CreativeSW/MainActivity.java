@@ -29,6 +29,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -74,21 +76,29 @@ public class MainActivity extends AppCompatActivity {
     TextView textStatus;
     Button btnPaired, btnSearch, btnSend1;
     ListView listView;
-    TextView txtResult;
     WebView webView = null;
     Button btn_findRoute;
     Button btn_nowLocation;
+    Button btn_user;
     EditText edit_startLocation;
     EditText edit_endLocation;
+    Button btn_nextIntent;
+    LinearLayout linLayout_user;
+    LinearLayout linLayout_manager;
+    Spinner spin_wholearduino;
+    Spinner spin_inroutearduino;
     private LocationManager locationManager;
     private LocationListener locationListener;
     private static final int REQUEST_LOCATION_PERMISSION = 1;
     private final Handler handler = new Handler();
     private int order = 0;
-    final String serverUrl = "http://3.35.191.211:8080";
+    ArrayList<String> strings = new ArrayList<>();  // 임시사용한 배열 변수
+    public static final String serverUrl = "http://3.35.191.211:8080/phone";
 
     private static String TARGET_DEVICE_NAME = "";
     private BluetoothConnector bluetoothConnector;
+    double curr_x = 0;
+    double curr_y = 0;
 
     @SuppressLint("MissingPermission")
     @Override
@@ -97,85 +107,43 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
-        Button imageButton = findViewById(R.id.next_intent);
-        imageButton.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), WebViewActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        txtResult = findViewById(R.id.textView2);   // txtResult에 현재위치정보 저장됨
-        txtResult.setMovementMethod(new ScrollingMovementMethod());
-
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
-        locationListener = new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-                updateLocationInfo(location);
-            }
-
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-            }
-
-            @Override
-            public void onProviderEnabled(String provider) {
-            }
-
-            @Override
-            public void onProviderDisabled(String provider) {
-            }
-        };
-
-        // 웹뷰 관련 내용들
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
+        btn_nextIntent = findViewById(R.id.next_intent);
+        btn_user = findViewById(R.id.btn_user);
         webView = findViewById(R.id.webview);
-
-        webView.setWebViewClient(new WebViewClient());
-        webView.setWebChromeClient(new WebChromeClient());
-        webView.setDownloadListener(new DownloadListener() {
-            @Override
-            public void onDownloadStart(String url, String userAgent, String contentDisposition,
-                                        String mimetype, long contentLength) {
-            }
-        });
-
-        WebSettings webSettings = webView.getSettings();
-        webSettings.setLoadWithOverviewMode(true);
-        webSettings.setUseWideViewPort(true);
-        webSettings.setSupportZoom(true);
-        webSettings.setBuiltInZoomControls(true);
-        webSettings.setJavaScriptEnabled(true);
-        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
-        webSettings.setSupportMultipleWindows(true);
-        webSettings.setDomStorageEnabled(true);
-        // 컨텐츠가 웹뷰보다 클 경우 스크린 크기에 맞게 조정
-        webSettings.setLoadWithOverviewMode(true);
-        // javascript의 window.open 허용
-        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
-
-        webView.loadUrl(serverUrl);
-
-        webView.addJavascriptInterface(new MainActivity.Bridge(this), "Bridge");
         btn_findRoute = findViewById(R.id.find_route);   // 길찾기 버튼
         btn_nowLocation = findViewById(R.id.now_location);   //  현위치 버튼
         edit_startLocation = findViewById(R.id.start_location);
         edit_endLocation = findViewById(R.id.end_location);
+        linLayout_user = findViewById(R.id.linLayout_user);
+        linLayout_manager = findViewById(R.id.linLayout_manager);
+        spin_wholearduino = findViewById(R.id.whole_arduino);
+        spin_inroutearduino = findViewById(R.id.in_route_arduino);
 
+        btn_nextIntent.setOnClickListener((v -> btnClicked_nextIntent(v)));
+        webView.addJavascriptInterface(new MainActivity.Bridge(this), "Bridge");
         btn_findRoute.setOnClickListener((v -> btnClicked_findRoute(v)));
         btn_nowLocation.setOnClickListener((v->btnClicked_nowLocation(v)));
+        btn_user.setOnClickListener((v -> btnClicked_user(v)));
+
+
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        init_listener_location();
+        init_webview();
+
+        linLayout_manager.setVisibility(View.GONE);
+
+        // Get permission
+        get_permission_location();
+        getLocation();
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this,android.R.layout.simple_spinner_item, strings
+        );
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
+        spin_wholearduino.setAdapter(adapter);
 
         // 블루투스 관련 내용들
-        // Get permission
-        String[] permission_list = {
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-        };
-        ActivityCompat.requestPermissions(MainActivity.this, permission_list, 1);
+
 
         // Enable bluetooth
 //        bluetoothbtAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -194,10 +162,6 @@ public class MainActivity extends AppCompatActivity {
 //            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
 //        }
 
-        ActivityCompat.requestPermissions(MainActivity.this,
-                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                REQUEST_LOCATION_PERMISSION);
-        getLocation();
 
         // variables
 //        textStatus = (TextView) findViewById(R.id.text_status);
@@ -231,6 +195,59 @@ public class MainActivity extends AppCompatActivity {
         //bluetoothConnector.startBluetoothConnection(getApplicationContext());
     }
 
+    void get_permission_location(){
+        String[] permission_list = {
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+        };
+        ActivityCompat.requestPermissions(MainActivity.this, permission_list, REQUEST_LOCATION_PERMISSION);
+    }
+    boolean is_permitted_location(){
+        return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED;
+    }
+    void init_listener_location(){
+        locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                updateLocationInfo(location);
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+            }
+        };
+    }
+    void init_webview(){
+        // 웹뷰 관련 내용들
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
+
+        webView.setWebViewClient(new WebViewClient());
+        webView.setWebChromeClient(new WebChromeClient());
+        WebSettings webSettings = webView.getSettings();
+        webSettings.setLoadWithOverviewMode(true);
+        webSettings.setUseWideViewPort(true);
+        webSettings.setSupportZoom(true);
+        webSettings.setBuiltInZoomControls(true);
+        webSettings.setJavaScriptEnabled(true);
+        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+        webSettings.setSupportMultipleWindows(true);
+        webSettings.setDomStorageEnabled(true);
+        // 컨텐츠가 웹뷰보다 클 경우 스크린 크기에 맞게 조정
+        webSettings.setLoadWithOverviewMode(true);
+        // javascript의 window.open 허용
+        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+
+        webView.loadUrl(serverUrl);
+    }
+
     // GPS에 대한 함수들
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -241,38 +258,31 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+    void btnClicked_nextIntent(View v){
+        linLayout_user.setVisibility(View.GONE);
+        linLayout_manager.setVisibility(View.VISIBLE);
+        //Intent intent = new Intent(getApplicationContext(), WebViewActivity.class);
+        //startActivity(intent);
+    }
+
+    void btnClicked_user(View v){
+        linLayout_user.setVisibility(View.VISIBLE);
+        linLayout_manager.setVisibility(View.GONE);
+    }
 
     private void getLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                1000,
-                1,
-                locationListener);
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-                1000,
-                1,
-                locationListener);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,1000,1,locationListener);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,1000,1,locationListener);
     }
 
     private void updateLocationInfo(Location location) {
-        String provider = location.getProvider();
         double longitude = location.getLongitude();
         double latitude = location.getLatitude();
-        double altitude = location.getAltitude();
-
-        txtResult.setText("위치정보 : " + provider + "\n" +
-                "위도 : " + longitude + "\n" +
-                "경도 : " + latitude + "\n" +
-                "고도 : " + altitude);
+        this.curr_x = longitude;
+        this.curr_y = latitude;
     }
 
     @Override
@@ -491,19 +501,31 @@ public class MainActivity extends AppCompatActivity {
     }
     void btnClicked_nowLocation(View v){
 
-        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(MainActivity.this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    REQUEST_LOCATION_PERMISSION);
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            get_permission_location();
         } else {
             getLocation();
-            String x = "127.0128954";
-            String y = "37.5596518";
-            webView.loadUrl("javascript:toWeb_currXy(" + x + "," + y + ")");
+            if(curr_x != 0 && curr_y != 0){
+                String x = "127.0128954";
+                String y = "37.5596518";
+                x = "" + curr_x;
+                y = "" + curr_y;
+                webView.loadUrl("javascript:toWeb_currXy(" + x + "," + y + ")");
+            }
         }
     }
 
+    void update_spin_wholeArduino(ArduinoDto[] arduinoDtoList){
+        spin_wholearduino.invalidate();
+        ArrayAdapter<String> adapter = (ArrayAdapter<String>) spin_wholearduino.getAdapter();
+        strings.clear();
+        for(int i=0; i<arduinoDtoList.length; i++){
+            ArduinoDto arduinoDto = arduinoDtoList[i];
+            String element = arduinoDto.name + ": " + arduinoDto.lng + "," + arduinoDto.lat;
+            strings.add(element);
+        }
+        adapter.notifyDataSetChanged();
+    }
 
     public class Bridge{
         Context mContext;
@@ -515,16 +537,16 @@ public class MainActivity extends AppCompatActivity {
         @JavascriptInterface
         public void fromWeb_allArduino(final String arduinoList){
             if(arduinoList == null){
-                Log.e("Javascript", "fromWeb_allArduino: Argument is null");
+                Log.e("Javascript-inapp", "Bridge1 fromWeb_allArduino: Argument is null");
                 return;
             }
-            Log.d("Javascript", "fromWeb_allArduino:\n" + arduinoList);
+            Log.d("Javascript-inapp", "Bridge1 fromWeb_allArduino:\n" + arduinoList);
             try {
                 ObjectMapper objectMapper = new ObjectMapper();
                 ArduinoDto[] arduinoDtoList = objectMapper.readValue(arduinoList, ArduinoDto[].class);
 
                 // TARGET_DEVICE_NAME에 들어있는 이름과 같은 기기를 발견하면 해당 기기와 연결
-
+                update_spin_wholeArduino(arduinoDtoList);
 
             } catch (Exception e) {
                 Log.e("Javascript", e.getMessage());
@@ -585,7 +607,6 @@ public class MainActivity extends AppCompatActivity {
             Log.d("Javascript", logMsg);
 
             String xy = x + "," + y;
-            Log.d("inapp", edit_startLocation.getText().toString());
             if(edit_startLocation.getText().toString().equals("")){
                 Editable editable = edit_startLocation.getEditableText();
                 editable.clear();

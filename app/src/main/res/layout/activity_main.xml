@@ -9,6 +9,7 @@
     tools:context=".MainActivity">
 
     <LinearLayout
+        android:id="@+id/linLayout_user"
         android:layout_width="match_parent"
         android:layout_height="139dp"
         android:orientation="horizontal">
@@ -26,13 +27,13 @@
 
                 <EditText
                     android:id="@+id/start_location"
-                    android:inputType="text"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
                     android:ems="10"
                     android:gravity="center"
                     android:hint="출발지 좌표"
+                    android:inputType="text"
                     android:textSize="20sp">
 
                 </EditText>
@@ -81,6 +82,179 @@
 
 
     </LinearLayout>
+    <LinearLayout
+        android:id="@+id/linLayout_manager"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+        <RelativeLayout
+            android:id="@+id/upper_rel_layout"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:orientation="horizontal"
+            android:layout_alignParentTop="true">
+
+            <RelativeLayout
+                android:id="@+id/input_box"
+                android:layout_width="200dp"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:id="@+id/first_inputbox"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_weight="1"
+                    android:layout_alignParentTop="true"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:layout_marginLeft="10dp"
+                        android:gravity="center_vertical"
+                        android:text="이름 : "
+                        android:textSize="17sp"></TextView>
+
+                    <EditText
+                        android:id="@+id/name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:ems="10"
+                        android:gravity="center"
+                        android:hint="이름"
+                        android:textSize="20sp">
+
+                    </EditText>
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/second_inputbox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_below="@id/first_inputbox"
+                    android:layout_weight="1">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="50dp"
+                        android:layout_gravity="center"
+                        android:gravity="center_vertical"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginLeft="10dp"
+                        android:text="위도 : "
+                        android:textSize="17sp"></TextView>
+
+                    <EditText
+                        android:id="@+id/lat"
+                        android:layout_width="wrap_content"
+                        android:layout_height="50dp"
+                        android:layout_gravity="center"
+                        android:ems="10"
+                        android:gravity="center"
+                        android:hint="위도"
+                        android:textSize="20sp">
+
+                    </EditText>
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/second_inputbox"
+                    android:layout_centerHorizontal="true"
+                    android:layout_weight="1">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:gravity="center_vertical"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginLeft="10dp"
+                        android:text="경도 : "
+                        android:textSize="17sp"></TextView>
+
+                    <EditText
+                        android:id="@+id/lng"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:ems="10"
+                        android:gravity="center"
+                        android:hint="경도"
+                        android:textSize="20sp">
+
+                    </EditText>
+
+                </RelativeLayout>
+
+            </RelativeLayout>
+
+            <Button
+                android:id="@+id/regist"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="3dp"
+                android:text="등록\n하기"
+                android:textSize="20sp">
+
+            </Button>
+
+            <Button
+                android:id="@+id/call_in"
+                android:text="불러\n오기"
+                android:textSize="20sp"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_marginRight="105dp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_gravity="center">
+
+            </Button>
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_below="@id/upper_rel_layout"
+            android:layout_width="match_parent"
+            android:layout_height="49dp"
+            android:orientation="horizontal">
+
+            <Spinner
+                android:id="@+id/whole_arduino"
+                android:layout_marginLeft="40dp"
+                android:layout_width="150dp"
+                android:layout_height="match_parent"
+                android:gravity="center">
+
+            </Spinner>
+            <Spinner
+                android:id="@+id/in_route_arduino"
+                android:layout_marginRight="40dp"
+                android:layout_alignParentRight="true"
+                android:layout_width="150dp"
+                android:layout_height="match_parent"
+                android:gravity="center">
+
+            </Spinner>
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
 
     <WebView
         android:id="@+id/webview"
@@ -100,7 +274,7 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/next"
+            android:id="@+id/btn_user"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="left"
@@ -196,25 +370,14 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/listview" />
 
-            <TextView
-                android:id="@+id/textView2"
-                android:layout_width="200dp"
-                android:layout_height="50dp"
-                android:scrollbars="vertical"
-                android:layout_gravity="center"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/btn_location" />
-
-            <TextView
+                <TextView
                 android:id="@+id/textView3"
                 android:layout_width="200dp"
                 android:layout_height="50dp"
                 android:scrollbars="vertical"
                 android:layout_gravity="center"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/textView2" />
+                app:layout_constraintRight_toRightOf="parent" />
 
             </LinearLayout>
 

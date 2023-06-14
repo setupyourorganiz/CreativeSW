@@ -181,7 +181,7 @@
     </LinearLayout>
 
     <WebView
-        android:id="@+id/webview"
+        android:id="@+id/webview1"
         android:layout_width="360dp"
         android:layout_height="400dp"
         android:layout_below="@id/biggest_linear"
@@ -195,7 +195,7 @@
         android:orientation="horizontal"
         android:layout_weight="7"
         android:layout_alignParentBottom="true"
-        app:layout_constraintTop_toBottomOf="@id/webview" >
+        app:layout_constraintTop_toBottomOf="@id/webview1" >
 
         <Button
             android:id="@+id/next_layout"
