@@ -5,9 +5,6 @@ import android.annotation.SuppressLint;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.BroadcastReceiver;
 
 import android.location.Location;
 import android.location.LocationListener;
@@ -15,10 +12,8 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
-import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.view.WindowManager;
-import android.webkit.DownloadListener;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -33,17 +28,12 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 
 import android.util.Log;
-
-import java.io.IOException;
-
-import java.lang.reflect.Method;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -60,11 +50,45 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SuppressLint({"SetJavaScriptEnabled", "JavascriptInterface"})
 public class MainActivity extends AppCompatActivity {
+
+    public static final String serverUrl = "http://3.35.191.211:8080/phone";
+    double curr_x = 0;
+    double curr_y = 0;
+    ArrayList<ArduinoDto> whole_arudino = new ArrayList<>();
+    ArrayList<PathArduinoDto> path_arduino = new ArrayList<>();
+    ArrayList<String> wholeArduino_spin = new ArrayList<>();
+    ArrayList<String> pathArduino_spin = new ArrayList<>();
+
+    WebView webView;
+    Button btn_findRoute;
+    Button btn_nowLocation;
+    Button btn_user;
+    Button btn_admin;
+    Button btn_allArduino;
+    Button btn_addArduino;
+    EditText edit_startLocation;
+    EditText edit_endLocation;
+    EditText edit_arduinoName;
+    EditText edit_arduinoLat;
+    EditText edit_arduinoLng;
+    LinearLayout linLayout_user;
+    LinearLayout linLayout_manager;
+    Spinner spin_wholeArduino;
+    Spinner spin_pathArduino;
+
+    int user_mode;
+
+
+    private LocationManager locationManager;
+    private LocationListener locationListener;
+    private static final int REQUEST_LOCATION_PERMISSION = 1;
+    private final Handler handler = new Handler();
+    private int order = 0;
+    private static String TARGET_DEVICE_NAME = "";
+    private BluetoothConnector bluetoothConnector;
     private static final BluetoothSocket TODO = null;
     final String TAG = MainActivity.class.getSimpleName();
     UUID BT_MODULE_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); // "random" unique identifier
-
-    // 블루투스 관련
     BluetoothAdapter btAdapter;
     Set<BluetoothDevice> pairedDevices;
     ArrayAdapter<String> btArrayAdapter;
@@ -73,33 +97,6 @@ public class MainActivity extends AppCompatActivity {
     BluetoothSocket btSocket = null;
     com.example.CreativeSW.ConnectedThread connectedThread;
 
-    TextView textStatus;
-    Button btnPaired, btnSearch, btnSend1;
-    ListView listView;
-    WebView webView = null;
-    Button btn_findRoute;
-    Button btn_nowLocation;
-    Button btn_user;
-    EditText edit_startLocation;
-    EditText edit_endLocation;
-    Button btn_nextIntent;
-    LinearLayout linLayout_user;
-    LinearLayout linLayout_manager;
-    Spinner spin_wholearduino;
-    Spinner spin_inroutearduino;
-    private LocationManager locationManager;
-    private LocationListener locationListener;
-    private static final int REQUEST_LOCATION_PERMISSION = 1;
-    private final Handler handler = new Handler();
-    private int order = 0;
-    ArrayList<String> strings = new ArrayList<>();  // 임시사용한 배열 변수
-    public static final String serverUrl = "http://3.35.191.211:8080/phone";
-
-    private static String TARGET_DEVICE_NAME = "";
-    private BluetoothConnector bluetoothConnector;
-    double curr_x = 0;
-    double curr_y = 0;
-
     @SuppressLint("MissingPermission")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,24 +104,44 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
-        btn_nextIntent = findViewById(R.id.next_intent);
-        btn_user = findViewById(R.id.btn_user);
         webView = findViewById(R.id.webview);
         btn_findRoute = findViewById(R.id.find_route);   // 길찾기 버튼
         btn_nowLocation = findViewById(R.id.now_location);   //  현위치 버튼
+        btn_admin = findViewById(R.id.btn_admin);
+        btn_user = findViewById(R.id.btn_user);
+        btn_allArduino = findViewById(R.id.btn_allArduino);
+        btn_addArduino = findViewById(R.id.btn_addArduino);
         edit_startLocation = findViewById(R.id.start_location);
         edit_endLocation = findViewById(R.id.end_location);
+        edit_arduinoName = findViewById(R.id.edit_arduinoName);
+        edit_arduinoLat = findViewById(R.id.edit_arduinoLat);
+        edit_arduinoLng = findViewById(R.id.edit_arduinoLng);
         linLayout_user = findViewById(R.id.linLayout_user);
         linLayout_manager = findViewById(R.id.linLayout_manager);
-        spin_wholearduino = findViewById(R.id.whole_arduino);
-        spin_inroutearduino = findViewById(R.id.in_route_arduino);
+        spin_wholeArduino = findViewById(R.id.spin_wholeArduino);
+        spin_pathArduino = findViewById(R.id.spin_pathArduino);
 
-        btn_nextIntent.setOnClickListener((v -> btnClicked_nextIntent(v)));
         webView.addJavascriptInterface(new MainActivity.Bridge(this), "Bridge");
+        btn_admin.setOnClickListener((v -> btnClicked_admin(v)));
         btn_findRoute.setOnClickListener((v -> btnClicked_findRoute(v)));
         btn_nowLocation.setOnClickListener((v->btnClicked_nowLocation(v)));
         btn_user.setOnClickListener((v -> btnClicked_user(v)));
+        btn_allArduino.setOnClickListener((v -> btnClicked_allArduino(v)));
+        btn_addArduino.setOnClickListener((v -> btnClicked_addArduino(v)));
+        spin_wholeArduino.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {spinItemChanged_allArduino(adapterView, view, i, l);}
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {}
+        });
+        spin_pathArduino.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {spinItemChanged_pathArduino(adapterView, view, i, l);}
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {}
+        });
 
+        user_mode = 1;
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         init_listener_location();
@@ -136,11 +153,12 @@ public class MainActivity extends AppCompatActivity {
         get_permission_location();
         getLocation();
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this,android.R.layout.simple_spinner_item, strings
-        );
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
-        spin_wholearduino.setAdapter(adapter);
+        ArrayAdapter<String> adapter_wholeArduino = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, wholeArduino_spin);
+        adapter_wholeArduino.setDropDownViewResource(android.R.layout.simple_spinner_item);
+        spin_wholeArduino.setAdapter(adapter_wholeArduino);
+        ArrayAdapter<String> adapter_pathArduino = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, pathArduino_spin);
+        adapter_pathArduino.setDropDownViewResource(android.R.layout.simple_spinner_item);
+        spin_pathArduino.setAdapter(adapter_pathArduino);
 
         // 블루투스 관련 내용들
 
@@ -205,7 +223,7 @@ public class MainActivity extends AppCompatActivity {
     boolean is_permitted_location(){
         return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED;
     }
-    void init_listener_location(){
+    void init_listener_location() {
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
@@ -225,30 +243,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
     }
-    void init_webview(){
-        // 웹뷰 관련 내용들
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
 
-        webView.setWebViewClient(new WebViewClient());
-        webView.setWebChromeClient(new WebChromeClient());
-        WebSettings webSettings = webView.getSettings();
-        webSettings.setLoadWithOverviewMode(true);
-        webSettings.setUseWideViewPort(true);
-        webSettings.setSupportZoom(true);
-        webSettings.setBuiltInZoomControls(true);
-        webSettings.setJavaScriptEnabled(true);
-        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
-        webSettings.setSupportMultipleWindows(true);
-        webSettings.setDomStorageEnabled(true);
-        // 컨텐츠가 웹뷰보다 클 경우 스크린 크기에 맞게 조정
-        webSettings.setLoadWithOverviewMode(true);
-        // javascript의 window.open 허용
-        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
-
-        webView.loadUrl(serverUrl);
-    }
-
-    // GPS에 대한 함수들
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -258,17 +253,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-    void btnClicked_nextIntent(View v){
-        linLayout_user.setVisibility(View.GONE);
-        linLayout_manager.setVisibility(View.VISIBLE);
-        //Intent intent = new Intent(getApplicationContext(), WebViewActivity.class);
-        //startActivity(intent);
-    }
 
-    void btnClicked_user(View v){
-        linLayout_user.setVisibility(View.VISIBLE);
-        linLayout_manager.setVisibility(View.GONE);
-    }
 
     private void getLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -483,6 +468,33 @@ public class MainActivity extends AppCompatActivity {
 //        return device.createRfcommSocketToServiceRecord(BT_MODULE_UUID);
 //    }
 
+
+    void init_webview(){
+        // 웹뷰 관련 내용들
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
+
+        webView.setWebViewClient(new WebViewClient());
+        webView.setWebChromeClient(new WebChromeClient());
+        WebSettings webSettings = webView.getSettings();
+        webSettings.setLoadWithOverviewMode(true);
+        webSettings.setUseWideViewPort(true);
+        webSettings.setSupportZoom(true);
+        webSettings.setBuiltInZoomControls(true);
+        webSettings.setJavaScriptEnabled(true);
+        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+        webSettings.setSupportMultipleWindows(true);
+        webSettings.setDomStorageEnabled(true);
+        webSettings.setLoadWithOverviewMode(true);
+        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+
+        webView.loadUrl(serverUrl);
+    }
+
+    void init_edit_addArduinoInfo(){
+        edit_arduinoName.setText("", TextView.BufferType.EDITABLE);
+        edit_arduinoLat.setText("", TextView.BufferType.EDITABLE);
+        edit_arduinoLng.setText("", TextView.BufferType.EDITABLE);
+    }
     void init_edit_endpoint(){
         Editable start = edit_startLocation.getEditableText();
         Editable end = edit_endLocation.getEditableText();
@@ -496,8 +508,8 @@ public class MainActivity extends AppCompatActivity {
         String y1 = start[1];
         String x2 = end[0];
         String y2 = end[1];
-        init_edit_endpoint();
         webView.loadUrl("javascript:toWeb_navigate(" + x1 + "," + y1 + "," + x2 + "," + y2 + ")");
+        init_edit_endpoint();
     }
     void btnClicked_nowLocation(View v){
 
@@ -515,16 +527,118 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    void update_spin_wholeArduino(ArduinoDto[] arduinoDtoList){
-        spin_wholearduino.invalidate();
-        ArrayAdapter<String> adapter = (ArrayAdapter<String>) spin_wholearduino.getAdapter();
-        strings.clear();
-        for(int i=0; i<arduinoDtoList.length; i++){
-            ArduinoDto arduinoDto = arduinoDtoList[i];
-            String element = arduinoDto.name + ": " + arduinoDto.lng + "," + arduinoDto.lat;
-            strings.add(element);
+    void btnClicked_admin(View v){
+        linLayout_user.setVisibility(View.GONE);
+        linLayout_manager.setVisibility(View.VISIBLE);
+        user_mode = 0;
+    }
+
+    void btnClicked_user(View v){
+        linLayout_user.setVisibility(View.VISIBLE);
+        linLayout_manager.setVisibility(View.GONE);
+
+        user_mode = 1;
+    }
+
+    void btnClicked_allArduino(View v){
+        Log.d("inapp", "funcName: btnClicked_allArduino: start");
+
+        String funcToinvoke = "javascript:toWeb_allArduino()";
+        webView.loadUrl(funcToinvoke);
+
+        Log.d("inapp", "funcName: btnClicked_allArduino: end");
+    }
+    void btnClicked_addArduino(View v){
+        Log.d("inapp", "funcName: btnClicked_addArduino: start");
+
+        String name = edit_arduinoName.getText().toString();
+        String lat = edit_arduinoLat.getText().toString();
+        String lng = edit_arduinoLng.getText().toString();
+        init_edit_addArduinoInfo();
+        if(name.equals("") || lat.equals("") || lng.equals("")){
+            return;
         }
+        String funcToinvoke = "javascript:toWeb_addArduino(\"" + name + "\"," + lng + "," + lat + ")";
+        webView.loadUrl(funcToinvoke);
+
+        Log.d("inapp", "funcName: btnClicked_addArduino: end");
+    }
+
+    void spinItemChanged_allArduino(AdapterView<?> parent, View view, int position, long id){
+        Log.d("inapp", "funcName: spinItemChanged_allArduino: start");
+
+        String item = (String)parent.getItemAtPosition(position);
+        String tmp[] = item.split(": ");
+        tmp = tmp[1].split(",");
+        String lng = tmp[0];
+        String lat = tmp[1];
+        String funcToinvoke = "javascript:toWeb_listChange(" + lng + "," + lat + ")";
+        webView.loadUrl(funcToinvoke);
+
+        Log.d("inapp", "funcName: spinItemChanged_allArduino: end");
+    }
+    void spinItemChanged_pathArduino(AdapterView<?> parent, View view, int position, long id){
+        spinItemChanged_allArduino(parent, view, position, id);
+    }
+
+    ArrayList<ArduinoDto> arr2arrList_arduinoDto(ArduinoDto[] arduinoDtos){
+        ArrayList<ArduinoDto> res = new ArrayList<>();
+        res.clear();
+        for(int i=0; i< arduinoDtos.length; i++){
+            res.add(arduinoDtos[i]);
+        }
+        return res;
+    }
+    String arduinoDto2Str(ArduinoDto arduinoDto){
+        return arduinoDto.name + ": " + arduinoDto.lng + "," + arduinoDto.lat;
+    }
+    ArrayList<String> arduinoDtoList2StrList(ArrayList<ArduinoDto> arduinoDtos){
+        ArrayList<String> res = new ArrayList<>();
+        for(int i=0; i<arduinoDtos.size(); i++){
+            String element = arduinoDto2Str(arduinoDtos.get(i));
+            res.add(element);
+        }
+        return res;
+    }
+
+    ArrayList<PathArduinoDto> arr2arrList_pathArduinoDto(PathArduinoDto[] pathArduinoDtos){
+        ArrayList<PathArduinoDto> res = new ArrayList<>();
+        res.clear();
+        for(int i=0; i< pathArduinoDtos.length; i++){
+            res.add(pathArduinoDtos[i]);
+        }
+        return res;
+    }
+    String pathArduinoDto2Str(PathArduinoDto pathArduinoDto){
+        return pathArduinoDto.arduino.name + ": " + pathArduinoDto.arduino.lng + "," + pathArduinoDto.arduino.lat;
+    }
+    ArrayList<String> pathArduinoDtoList2StrList(ArrayList<PathArduinoDto> pathArduinoDtos){
+        ArrayList<String> res = new ArrayList<>();
+        for(int i=0; i<pathArduinoDtos.size(); i++){
+            String element = pathArduinoDto2Str(pathArduinoDtos.get(i));
+            res.add(element);
+        }
+        return res;
+    }
+
+    void update_spin_wholeArduino(ArrayList<String> elements){
+        ArrayAdapter<String> adapter = (ArrayAdapter<String>) spin_wholeArduino.getAdapter();
+        wholeArduino_spin.clear();
+        wholeArduino_spin.addAll(elements);
         adapter.notifyDataSetChanged();
+
+        spin_wholeArduino.invalidate();
+    }
+    void update_spin_pathArduino(ArrayList<String> elements){
+        ArrayAdapter<String> adapter = (ArrayAdapter<String>) spin_pathArduino.getAdapter();
+        pathArduino_spin.clear();
+        pathArduino_spin.addAll(elements);
+        adapter.notifyDataSetChanged();
+        spin_pathArduino.invalidate();
+    }
+
+    void update_edit_text(EditText edit, String text){
+        edit.setText(text, TextView.BufferType.EDITABLE);
     }
 
     public class Bridge{
@@ -533,70 +647,67 @@ public class MainActivity extends AppCompatActivity {
             mContext = context;
         }
 
-        // 현재 등록된 모든 아두이노 정보를 가져옴
         @JavascriptInterface
         public void fromWeb_allArduino(final String arduinoList){
             if(arduinoList == null){
-                Log.e("Javascript-inapp", "Bridge1 fromWeb_allArduino: Argument is null");
+                Log.e("Javascript-inapp", "funcName: fromWeb_allArduino: Argument is null");
                 return;
             }
-            Log.d("Javascript-inapp", "Bridge1 fromWeb_allArduino:\n" + arduinoList);
+            Log.d("Javascript-inapp", "funcName: fromWeb_allArduino:\n" + arduinoList);
             try {
                 ObjectMapper objectMapper = new ObjectMapper();
                 ArduinoDto[] arduinoDtoList = objectMapper.readValue(arduinoList, ArduinoDto[].class);
 
-                // TARGET_DEVICE_NAME에 들어있는 이름과 같은 기기를 발견하면 해당 기기와 연결
-                update_spin_wholeArduino(arduinoDtoList);
+                whole_arudino.clear();
+                whole_arudino.addAll(arr2arrList_arduinoDto(arduinoDtoList));
 
             } catch (Exception e) {
-                Log.e("Javascript", e.getMessage());
+                Log.e("Javascript-inapp", e.getMessage());
                 e.printStackTrace();
             }
+            update_spin_wholeArduino(arduinoDtoList2StrList(whole_arudino));
+            spin_wholeArduino.invalidate();
         }
 
-        // 길찾기에서 경로 상에 있는 사거리 아두이노 리스트를 가져옴.
         @JavascriptInterface
         public void fromWeb_pathArduino(final String pathArduinoList){
             if(pathArduinoList == null){
-                Log.e("Javascript", "fromWeb_pathArduino: Argument is null");
+                Log.e("Javascript-inapp", "funcName: fromWeb_pathArduino: Argument is null");
                 return;
             }
-            Log.d("Javascript", "fromWeb_pathArduino:\n" + pathArduinoList);
+            Log.d("Javascript-inapp", "funcName: fromWeb_pathArduino:\n" + pathArduinoList);
             try {
                 ObjectMapper objectMapper = new ObjectMapper();
                 PathArduinoDto[] pathArduinoDtoList = objectMapper.readValue(pathArduinoList, PathArduinoDto[].class);
 
                 // <실행할 함수 추가>
-                for(PathArduinoDto e : pathArduinoDtoList){
-                    String msg = e.arduino.name + ": " + e.direction;
-                    Log.d("Javascript", msg);
-                }
+                path_arduino.clear();
+                path_arduino.addAll(arr2arrList_pathArduinoDto(pathArduinoDtoList));
 
             } catch (Exception e) {
-                Log.e("Javascript", e.getMessage());
+                Log.e("Javascript-inapp", e.getMessage());
                 e.printStackTrace();
             }
+            update_spin_pathArduino(pathArduinoDtoList2StrList(path_arduino));
         }
 
         // 마커 클릭 시 마커의 좌표를 가져옴
         @JavascriptInterface
         public void fromWeb_xy(double x, double y){
-            String logMsg = "fromWeb_xy: " + x + ", " + y;
-            Log.d("Javascript", logMsg);
+            String logMsg = "funcName: fromWeb_xy: " + x + ", " + y;
+            Log.d("Javascript-inapp", logMsg);
 
             // <실행할 함수 추가>
         }
 
-        // 자바스크립트 디버그를 안드로이드에 표시
         @JavascriptInterface
-        public void fromWeb_debug(final String message){ // 블루투스 이름과 방향을 전달받는다
+        public void fromWeb_debug(final String message){
             Log.d("Javascript", message);
 
         }
 
-        // 자바스크립트 에러를 안드로이드에 표시
         @JavascriptInterface
-        public void fromWeb_err(final String message){ // 블루투스 이름과 방향을 전달받는다
+        public void fromWeb_err(final String message){
             Log.e("Javascript", message);
 
         }
@@ -604,18 +715,28 @@ public class MainActivity extends AppCompatActivity {
         @JavascriptInterface
         public void fromWeb_markerClick(double x, double y){
             String logMsg = "fromWeb_markerClick: " + x + ", " + y;
-            Log.d("Javascript", logMsg);
+            Log.d("Javascript-inapp", logMsg);
+
+            if(user_mode == 1) {
+                String xy = x + "," + y;
+                if (edit_startLocation.getText().toString().equals("")) {
+                    update_edit_text(edit_startLocation, xy);
+                } else {
+                    update_edit_text(edit_endLocation, xy);
+                }
+            }else if(user_mode == 0){
+                update_edit_text(edit_arduinoLng, Double.toString(x));
+                update_edit_text(edit_arduinoLat, Double.toString(y));
+            }
+        }
+
+        @JavascriptInterface
+        public void fromWeb_markerClick_currXy(double x, double y){
+            String logMsg = "fromWeb_markerClick_currXy: " + x + ", " + y;
+            Log.d("Javascript-inapp", logMsg);
 
             String xy = x + "," + y;
-            if(edit_startLocation.getText().toString().equals("")){
-                Editable editable = edit_startLocation.getEditableText();
-                editable.clear();
-                editable.append(xy);
-            }else{
-                Editable editable = edit_endLocation.getEditableText();
-                editable.clear();
-                editable.append(xy);
-            }
+            update_edit_text(edit_startLocation, xy);
         }
     }
 }

@@ -14,51 +14,39 @@
         android:layout_height="139dp"
         android:orientation="horizontal">
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="195dp"
             android:layout_height="128dp"
             android:layout_gravity="center"
             android:orientation="vertical">
 
-            <LinearLayout
+            <EditText
+                android:id="@+id/start_location"
                 android:layout_width="match_parent"
                 android:layout_height="67dp"
-                android:orientation="horizontal">
+                android:layout_gravity="center"
+                android:ems="10"
+                android:gravity="center"
+                android:hint="출발지 좌표"
+                android:textSize="20sp"
+                android:bufferType="editable">
+            </EditText>
 
-                <EditText
-                    android:id="@+id/start_location"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center"
-                    android:ems="10"
-                    android:gravity="center"
-                    android:hint="출발지 좌표"
-                    android:inputType="text"
-                    android:textSize="20sp">
-
-                </EditText>
-
-            </LinearLayout>
-
-            <LinearLayout
+            <EditText
+                android:id="@+id/end_location"
                 android:layout_width="match_parent"
-                android:layout_height="67dp">
+                android:layout_height="67dp"
+                android:layout_gravity="center"
+                android:ems="10"
+                android:gravity="center"
+                android:layout_below="@id/start_location"
+                android:hint="도착지 좌표"
+                android:textSize="20sp"
+                android:bufferType="editable">
 
-                <EditText
-                    android:id="@+id/end_location"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center"
-                    android:ems="10"
-                    android:gravity="center"
-                    android:hint="도착지 좌표"
-                    android:textSize="20sp">
+            </EditText>
 
-                </EditText>
-
-            </LinearLayout>
-
-        </LinearLayout>
+        </RelativeLayout>
 
         <Button
             android:id="@+id/find_route"
@@ -79,9 +67,8 @@
             android:text="현위치">
 
         </Button>
-
-
     </LinearLayout>
+
     <LinearLayout
         android:id="@+id/linLayout_manager"
         android:layout_width="match_parent"
@@ -104,104 +91,54 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
-                <RelativeLayout
-                    android:id="@+id/first_inputbox"
-                    android:layout_width="match_parent"
+                <EditText
+                    android:id="@+id/edit_arduinoName"
+                    android:layout_width="200dp"
                     android:layout_height="50dp"
-                    android:layout_weight="1"
-                    android:layout_alignParentTop="true"
-                    android:orientation="horizontal">
+                    android:layout_gravity="center"
+                    android:ems="10"
+                    android:gravity="center"
+                    android:hint="이름"
+                    android:textSize="20sp"
+                    android:bufferType="editable">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_gravity="center"
-                        android:layout_marginLeft="10dp"
-                        android:gravity="center_vertical"
-                        android:text="이름 : "
-                        android:textSize="17sp"></TextView>
+                </EditText>
 
-                    <EditText
-                        android:id="@+id/name"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_gravity="center"
-                        android:ems="10"
-                        android:gravity="center"
-                        android:hint="이름"
-                        android:textSize="20sp">
 
-                    </EditText>
+                <EditText
+                    android:id="@+id/edit_arduinoLat"
+                    android:layout_width="200dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center"
+                    android:layout_below="@id/edit_arduinoName"
+                    android:ems="10"
+                    android:gravity="center"
+                    android:hint="위도"
+                    android:textSize="20sp"
+                    android:bufferType="editable">
 
-                </RelativeLayout>
+                </EditText>
 
-                <RelativeLayout
-                    android:id="@+id/second_inputbox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
-                    android:layout_below="@id/first_inputbox"
-                    android:layout_weight="1">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="50dp"
-                        android:layout_gravity="center"
-                        android:gravity="center_vertical"
-                        android:layout_marginTop="2dp"
-                        android:layout_marginLeft="10dp"
-                        android:text="위도 : "
-                        android:textSize="17sp"></TextView>
+                <EditText
+                    android:id="@+id/edit_arduinoLng"
+                    android:layout_width="200dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center"
+                    android:layout_below="@id/edit_arduinoLat"
+                    android:ems="10"
+                    android:gravity="center"
+                    android:hint="경도"
+                    android:textSize="20sp"
+                    android:inputType=""
+                    android:bufferType="editable">
 
-                    <EditText
-                        android:id="@+id/lat"
-                        android:layout_width="wrap_content"
-                        android:layout_height="50dp"
-                        android:layout_gravity="center"
-                        android:ems="10"
-                        android:gravity="center"
-                        android:hint="위도"
-                        android:textSize="20sp">
-
-                    </EditText>
-
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/second_inputbox"
-                    android:layout_centerHorizontal="true"
-                    android:layout_weight="1">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_gravity="center"
-                        android:gravity="center_vertical"
-                        android:layout_marginTop="2dp"
-                        android:layout_marginLeft="10dp"
-                        android:text="경도 : "
-                        android:textSize="17sp"></TextView>
-
-                    <EditText
-                        android:id="@+id/lng"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_gravity="center"
-                        android:ems="10"
-                        android:gravity="center"
-                        android:hint="경도"
-                        android:textSize="20sp">
-
-                    </EditText>
-
-                </RelativeLayout>
+                </EditText>
 
             </RelativeLayout>
 
             <Button
-                android:id="@+id/regist"
+                android:id="@+id/btn_addArduino"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_alignParentRight="true"
@@ -213,7 +150,7 @@
             </Button>
 
             <Button
-                android:id="@+id/call_in"
+                android:id="@+id/btn_allArduino"
                 android:text="불러\n오기"
                 android:textSize="20sp"
                 android:layout_width="100dp"
@@ -234,7 +171,7 @@
             android:orientation="horizontal">
 
             <Spinner
-                android:id="@+id/whole_arduino"
+                android:id="@+id/spin_wholeArduino"
                 android:layout_marginLeft="40dp"
                 android:layout_width="150dp"
                 android:layout_height="match_parent"
@@ -242,7 +179,7 @@
 
             </Spinner>
             <Spinner
-                android:id="@+id/in_route_arduino"
+                android:id="@+id/spin_pathArduino"
                 android:layout_marginRight="40dp"
                 android:layout_alignParentRight="true"
                 android:layout_width="150dp"
@@ -283,7 +220,7 @@
             app:layout_constraintTop_toBottomOf="@id/webview" />
 
         <Button
-            android:id="@+id/next_intent"
+            android:id="@+id/btn_admin"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="right"
@@ -314,38 +251,6 @@
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <Button
-                android:id="@+id/btn_paired"
-                android:text="Paired Devices"
-                android:onClick="onClickButtonPaired"
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/text_status"/>
-
-            <Button
-                android:id="@+id/btn_search"
-                android:text="Search"
-                android:onClick="onClickButtonSearch"
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/btn_paired"/>
-
-            <Button
-                android:id="@+id/btn_send1"
-                android:text="Send a"
-                android:onClick="onClickButtonSend1"
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/btn_search"/>
 
             <ListView
                 android:id="@+id/listview"
@@ -357,18 +262,7 @@
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/next_intent" />
-
-            <Button
-                android:id="@+id/btn_location"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:onClick="onClickButtonPaired"
-                android:text="현위치 입력"
-                android:layout_gravity="center"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/listview" />
+                app:layout_constraintTop_toBottomOf="@id/btn_admin" />
 
                 <TextView
                 android:id="@+id/textView3"

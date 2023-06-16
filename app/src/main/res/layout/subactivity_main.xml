@@ -47,7 +47,7 @@
                         android:textSize="17sp"></TextView>
 
                     <EditText
-                        android:id="@+id/name"
+                        android:id="@+id/edit_arduinoName"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:layout_gravity="center"
@@ -79,7 +79,7 @@
                         android:textSize="17sp"></TextView>
 
                     <EditText
-                        android:id="@+id/lat"
+                        android:id="@+id/edit_arduinoLat"
                         android:layout_width="wrap_content"
                         android:layout_height="50dp"
                         android:layout_gravity="center"
@@ -110,7 +110,7 @@
                         android:textSize="17sp"></TextView>
 
                     <EditText
-                        android:id="@+id/lng"
+                        android:id="@+id/edit_arduinoLng"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:layout_gravity="center"
@@ -126,7 +126,7 @@
             </RelativeLayout>
 
             <Button
-                android:id="@+id/regist"
+                android:id="@+id/btn_addArduino"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_alignParentRight="true"
@@ -138,7 +138,7 @@
             </Button>
 
             <Button
-                android:id="@+id/call_in"
+                android:id="@+id/btn_allArduino"
                 android:text="불러\n오기"
                 android:textSize="20sp"
                 android:layout_width="100dp"
@@ -159,7 +159,7 @@
             android:orientation="horizontal">
 
             <Spinner
-                android:id="@+id/whole_arduino"
+                android:id="@+id/spin_wholeArduino"
                 android:layout_marginLeft="40dp"
                 android:layout_width="150dp"
                 android:layout_height="match_parent"
@@ -167,7 +167,7 @@
 
             </Spinner>
             <Spinner
-                android:id="@+id/in_route_arduino"
+                android:id="@+id/spin_pathArduino"
                 android:layout_marginRight="40dp"
                 android:layout_alignParentRight="true"
                 android:layout_width="150dp"

@@ -1,7 +1,6 @@
 package com.example.CreativeSW;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.util.Log;
@@ -18,7 +17,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.AdapterView;
-import android.widget.SpinnerAdapter;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -34,14 +32,11 @@ public class WebViewActivity extends AppCompatActivity {
 
     Button btn_regist;
     Button btn_callin;
-    Spinner spin_wholearduino;
-    Spinner spin_inroutearduino;
-    EditText edit_name;
-    EditText edit_lat;
-    EditText edit_lng;
-    String Name;
-    String Lat;
-    String Lng;
+    Spinner spin_wholeArduino;
+    Spinner spin_pathArduino;
+    EditText edit_arduinoName;
+    EditText edit_arduinoLat;
+    EditText edit_arduinoLng;
     String marker_x;
     String marker_y;
     ArrayList<String> strings = new ArrayList<>();  // 임시사용한 배열 변수
@@ -89,19 +84,15 @@ public class WebViewActivity extends AppCompatActivity {
         webView.addJavascriptInterface(new WebViewActivity.Bridge(this), "Bridge");
 
         // 버튼들 연결
-        btn_regist = findViewById(R.id.regist);
-        btn_callin = findViewById(R.id.call_in);
+        btn_regist = findViewById(R.id.btn_addArduino);
+        btn_callin = findViewById(R.id.btn_allArduino);
 
-        spin_wholearduino = findViewById(R.id.whole_arduino);
-        spin_inroutearduino = findViewById(R.id.in_route_arduino);
+        spin_wholeArduino = findViewById(R.id.spin_wholeArduino);
+        spin_pathArduino = findViewById(R.id.spin_pathArduino);
 
-        edit_name = findViewById(R.id.name);
-        edit_lat = findViewById(R.id.lat);
-        edit_lng = findViewById(R.id.lng);
-
-        Name = edit_name.getText().toString();    // 이름 입력을 Name에 저장
-        Lat = edit_lat.getText().toString();      // 위도 입력을 Lat에 저장
-        Lng = edit_lng.getText().toString();      // 경도 입력을 Lng에 저장
+        edit_arduinoName = findViewById(R.id.edit_arduinoName);
+        edit_arduinoLat = findViewById(R.id.edit_arduinoLat);
+        edit_arduinoLng = findViewById(R.id.edit_arduinoLng);
 
         // 스피너(리스트박스) 사용을 위한 설정 및 함수들
 
@@ -109,9 +100,9 @@ public class WebViewActivity extends AppCompatActivity {
                 this,android.R.layout.simple_spinner_item, strings
         );
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
-        spin_wholearduino.setAdapter(adapter);
+        spin_wholeArduino.setAdapter(adapter);
         //spin_inroutearduino.setAdapter(adapter);
-        spin_wholearduino.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
+        spin_wholeArduino.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id){
                 // 선택되면 사용할 함수 작성
@@ -121,7 +112,7 @@ public class WebViewActivity extends AppCompatActivity {
                 // 선택되지 않았을 때
             }
         });
-        spin_inroutearduino.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
+        spin_pathArduino.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id){
                 // 선택되면 사용할 함수 작성
@@ -148,7 +139,7 @@ public class WebViewActivity extends AppCompatActivity {
     }
 
     void btnClicked_regist(View v){
-        webView.loadUrl("javascript:toWeb_addArduino(" + edit_name + "," + edit_lat + "," + edit_lng + ")");
+        webView.loadUrl("javascript:toWeb_addArduino(" + edit_arduinoName + "," + edit_arduinoLat + "," + edit_arduinoLng + ")");
     }
 
     void btnClicked_callin(View v){
@@ -156,8 +147,8 @@ public class WebViewActivity extends AppCompatActivity {
     }
 
     void update_spin_wholeArduino(ArduinoDto[] arduinoDtoList){
-        spin_wholearduino.invalidate();
-        ArrayAdapter<String> adapter = (ArrayAdapter<String>) spin_wholearduino.getAdapter();
+        spin_wholeArduino.invalidate();
+        ArrayAdapter<String> adapter = (ArrayAdapter<String>) spin_wholeArduino.getAdapter();
         strings.clear();
         for(int i=0; i<arduinoDtoList.length; i++){
             ArduinoDto arduinoDto = arduinoDtoList[i];
@@ -251,10 +242,10 @@ public class WebViewActivity extends AppCompatActivity {
             // <실행할 함수 추가>
             marker_x = Double.toString(x);
             marker_y = Double.toString(y);
-            Editable editable1 = edit_lng.getEditableText();
+            Editable editable1 = edit_arduinoLng.getEditableText();
             editable1.clear();
             editable1.append(marker_x);
-            Editable editable2 = edit_lat.getEditableText();
+            Editable editable2 = edit_arduinoLat.getEditableText();
             editable2.clear();
             editable2.append(marker_y);
         }
