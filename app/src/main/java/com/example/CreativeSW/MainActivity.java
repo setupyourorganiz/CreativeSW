@@ -539,7 +539,6 @@ public class MainActivity extends AppCompatActivity {
 
         user_mode = 1;
     }
-
     void btnClicked_allArduino(View v){
         Log.d("inapp", "funcName: btnClicked_allArduino: start");
 
@@ -622,19 +621,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void update_spin_wholeArduino(ArrayList<String> elements){
-        ArrayAdapter<String> adapter = (ArrayAdapter<String>) spin_wholeArduino.getAdapter();
         wholeArduino_spin.clear();
         wholeArduino_spin.addAll(elements);
-        adapter.notifyDataSetChanged();
-
-        spin_wholeArduino.invalidate();
+        ArrayAdapter<String> adapter = (ArrayAdapter<String>) spin_wholeArduino.getAdapter();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                adapter.notifyDataSetChanged();
+            }
+        });
     }
     void update_spin_pathArduino(ArrayList<String> elements){
-        ArrayAdapter<String> adapter = (ArrayAdapter<String>) spin_pathArduino.getAdapter();
         pathArduino_spin.clear();
         pathArduino_spin.addAll(elements);
-        adapter.notifyDataSetChanged();
-        spin_pathArduino.invalidate();
+        ArrayAdapter<String> adapter = (ArrayAdapter<String>) spin_pathArduino.getAdapter();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                adapter.notifyDataSetChanged();
+            }
+        });
     }
 
     void update_edit_text(EditText edit, String text){
@@ -666,7 +672,6 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
             update_spin_wholeArduino(arduinoDtoList2StrList(whole_arudino));
-            spin_wholeArduino.invalidate();
         }
 
         @JavascriptInterface

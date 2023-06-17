@@ -17,21 +17,26 @@ public class Bridge{
     @JavascriptInterface
     public void fromWeb_allArduino(final String arduinoList){
         if(arduinoList == null){
-            Log.e("Javascript", "fromWeb_allArduino: Argument is null");
+            Log.e("Javascript-inapp", "funcName: fromWeb_allArduino: Argument is null");
             return;
         }
-        Log.d("Javascript", "fromWeb_allArduino:\n" + arduinoList);
+        Log.d("Javascript-inapp", "funcName: fromWeb_allArduino:\n" + arduinoList);
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             ArduinoDto[] arduinoDtoList = objectMapper.readValue(arduinoList, ArduinoDto[].class);
-
-            // TARGET_DEVICE_NAME에 들어있는 이름과 같은 기기를 발견하면 해당 기기와 연결
-
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    //whole_arudino.clear();
+                    //whole_arudino.addAll(arr2arrList_arduinoDto(arduinoDtoList));
+                }
+            });
 
         } catch (Exception e) {
-            Log.e("Javascript", e.getMessage());
+            Log.e("Javascript-inapp", e.getMessage());
             e.printStackTrace();
         }
+        //update_spin_wholeArduino(arduinoDtoList2StrList(whole_arudino));
     }
 
     // 길찾기에서 경로 상에 있는 사거리 아두이노 리스트를 가져옴.
