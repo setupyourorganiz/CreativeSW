@@ -15,7 +15,7 @@
         android:orientation="horizontal">
 
         <RelativeLayout
-            android:layout_width="195dp"
+            android:layout_width="200dp"
             android:layout_height="128dp"
             android:layout_gravity="center"
             android:orientation="vertical">
@@ -50,23 +50,26 @@
 
         <Button
             android:id="@+id/find_route"
+            android:textSize="20sp"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_gravity="center"
-            android:layout_marginLeft="5dp"
+            android:layout_marginRight="3dp"
             android:text="길찾기">
-
         </Button>
 
         <Button
             android:id="@+id/now_location"
+            android:textSize="20sp"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_gravity="center"
-            android:layout_marginLeft="5dp"
+            android:layout_marginRight="105dp"
             android:text="현위치">
 
         </Button>
+
+
     </LinearLayout>
 
     <LinearLayout
@@ -196,14 +199,25 @@
     <WebView
         android:id="@+id/webview"
         android:layout_width="390dp"
-        android:layout_height="395dp"
+        android:layout_height="400dp"
         android:layout_gravity="center"
         android:layout_marginStart="1dp"
         android:layout_marginEnd="1dp"
         android:layout_marginBottom="50dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent" >
+
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/floatBtn_color"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_x="310dp"
+            android:layout_y="318dp"
+            android:clickable="true"
+            app:backgroundTint="#ff0000"/>
+    </WebView>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -229,52 +243,5 @@
             app:layout_constraintTop_toBottomOf="@id/webview" />
 
     </LinearLayout>
-
-    <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/text_status"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="status"
-                android:textSize="20dp"
-                android:layout_gravity="center"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-
-            <ListView
-                android:id="@+id/listview"
-                android:layout_width="wrap_content"
-                android:layout_height="200dp"
-                android:scrollbars="vertical"
-                android:layout_gravity="center"
-                android:layout_margin="10dp"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/btn_admin" />
-
-                <TextView
-                android:id="@+id/textView3"
-                android:layout_width="200dp"
-                android:layout_height="50dp"
-                android:scrollbars="vertical"
-                android:layout_gravity="center"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent" />
-
-            </LinearLayout>
-
-        </ScrollView>
 
 </LinearLayout>
